@@ -6,8 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.job4j.site.dto.CategoryDTO;
+import ru.job4j.site.dto.InterviewDTO;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -76,5 +80,24 @@ public class CategoriesService {
             }
         }
         return result;
+    }
+
+    public Map<Integer, Long> getCountNewInterviewsByCategory(List<CategoryDTO> categoryDTOS,
+                                                              List<InterviewDTO> newInterviews) throws JsonProcessingException {
+        Map<Integer, Long> interviewByCategory = new HashMap<>();
+        if (!categoryDTOS.isEmpty()) {
+            Map<Integer, Long> interviewByTopic = newInterviews.stream()
+                    .collect(Collectors.groupingBy(InterviewDTO::getTopicId, Collectors.counting()));
+
+            for (CategoryDTO categoryDTO : categoryDTOS) {
+                var topics = topicsService.getByCategory(categoryDTO.getId());
+                topics.forEach(topicDTO -> {
+                    var value = interviewByTopic.getOrDefault(topicDTO.getId(), 0L);
+                    var sum = interviewByCategory.getOrDefault(topicDTO.getCategory().getId(), 0L) + value;
+                    interviewByCategory.put(topicDTO.getCategory().getId(), sum);
+                });
+            }
+        }
+        return interviewByCategory;
     }
 }
