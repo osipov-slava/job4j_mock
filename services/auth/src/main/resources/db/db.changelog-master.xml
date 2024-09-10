@@ -17,4 +17,5 @@
     <include file="changelog/010_ddl_person_add_column_created.xml" relativeToChangelogFile="true"/>
     <include file="changelog/011_dml_person_insert.xml" relativeToChangelogFile="true"/>
     <include file="changelog/012_ddl_alter_person_table_to_name_profile.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/013_ddl_alter_profile_table.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

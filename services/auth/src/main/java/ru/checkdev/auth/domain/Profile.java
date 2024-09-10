@@ -27,6 +27,9 @@ public class Profile {
     @Column(unique = true)
     private String email;
 
+    @Column(name = "telegram_id")
+    private Long telegramId;
+
     private String key;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -164,6 +167,14 @@ public class Profile {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Long getTelegramId() {
+        return telegramId;
+    }
+
+    public void setTelegramId(Long telegramId) {
+        this.telegramId = telegramId;
     }
 
     public List<Role> getRoles() {

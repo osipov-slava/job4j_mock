@@ -18,7 +18,6 @@ import java.util.stream.IntStream;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = SiteSrv.class)
@@ -47,7 +46,7 @@ public class InterviewsControllerTest {
     public void whenShowAllInterviews() throws Exception {
         var token = "1410";
         var id = 1;
-        var profile = new ProfileDTO(id, "username", "experience", 1,
+        var profile = new ProfileDTO(id, "username", "email", 1L, "experience", 1,
                 Calendar.getInstance(), Calendar.getInstance());
         var userInfo = new UserInfoDTO();
         userInfo.setId(1);
@@ -96,7 +95,7 @@ public class InterviewsControllerTest {
                         .sessionAttr("token", token)
                         .param("page", "1")
                         .param("size", "5"))
-                
+
                 .andExpect(model().attribute("statisticMap", new HashMap<>()))
                 .andExpect(model().attribute("interviewsPage", page))
                 .andExpect(model().attribute("statuses", StatusInterview.values()))

@@ -63,7 +63,7 @@ class IndexControllerTest {
 
     @Test
     void whenGetIndexPageThenReturnIndex() throws Exception {
-        ProfileDTO profileDTO = new ProfileDTO(1, "User", null, null, null, null);
+        ProfileDTO profileDTO = new ProfileDTO(1, "User", null, null, null, null, null, null);
         List<ProfileDTO> profileDTOS = List.of(profileDTO);
         when(profilesService.getAllProfile()).thenReturn(profileDTOS);
         Map<Integer, String> map = new HashMap<>();

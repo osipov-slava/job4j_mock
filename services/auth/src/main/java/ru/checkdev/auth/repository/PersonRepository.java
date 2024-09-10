@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import ru.checkdev.auth.domain.Profile;
 import ru.checkdev.auth.domain.Photo;
+import ru.checkdev.auth.domain.Profile;
 import ru.checkdev.auth.dto.ProfileDTO;
 
 import java.util.List;
@@ -19,6 +19,8 @@ import java.util.List;
 public interface PersonRepository extends CrudRepository<Profile, Integer> {
 
     Profile findByEmail(String email);
+
+    List<Profile> findByTelegramId(Long id);
 
     Profile findByEmailAndUsername(String email, String username);
 
@@ -60,7 +62,7 @@ public interface PersonRepository extends CrudRepository<Profile, Integer> {
      * @param id int person id
      * @return ProfileDTO
      */
-    @Query("SELECT new ru.checkdev.auth.dto.ProfileDTO(p.id, p.username, p.experience, p.photo.id, p.updated, p.created) FROM profile p WHERE p.id = :id")
+    @Query("SELECT new ru.checkdev.auth.dto.ProfileDTO(p.id, p.username, p.email, p.telegramId, p.experience, p.photo.id, p.updated, p.created) FROM profile p WHERE p.id = :id")
     ProfileDTO findProfileById(@Param("id") int id);
 
     /**
@@ -70,6 +72,11 @@ public interface PersonRepository extends CrudRepository<Profile, Integer> {
      *
      * @return List ProfileDTO
      */
-    @Query("SELECT new ru.checkdev.auth.dto.ProfileDTO(p.id, p.username, p.experience, p.photo.id, p.updated, p.created) FROM profile p ORDER BY p.created DESC")
+    @Query("SELECT new ru.checkdev.auth.dto.ProfileDTO(p.id, p.username, p.email, p.telegramId, p.experience, p.photo.id, p.updated, p.created) FROM profile p ORDER BY p.created DESC")
     List<ProfileDTO> findProfileOrderByCreatedDesc();
+
+    @Modifying
+    @Query("update profile p set p.telegramId = ?2 where p.email = ?1")
+    void updateTelegramId(String email, Long telegramId);
+
 }

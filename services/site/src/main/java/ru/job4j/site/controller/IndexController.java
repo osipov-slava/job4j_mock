@@ -55,7 +55,8 @@ public class IndexController {
         model.addAttribute("newInterviewByCategoryMap",
                 categoriesService.getCountNewInterviewsByCategory(categoryDTOS, newInterviews));
 
-        Map<Integer, String> userNameMap = profilesService.getAllProfile().stream()
+        var profiles = profilesService.getAllProfile();
+        Map<Integer, String> userNameMap = profiles.stream()
                 .collect(Collectors.toMap(ProfileDTO::getId, ProfileDTO::getUsername));
         model.addAttribute("userNameMap", userNameMap);
 

@@ -22,6 +22,8 @@ public class ProfileDTO {
     @EqualsAndHashCode.Include
     private Integer id;
     private String username;
+    private String email;
+    private Long telegramId;
     private String experience;
     private Integer photoId;
     /**

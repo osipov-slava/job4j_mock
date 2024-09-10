@@ -19,7 +19,6 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,9 +38,9 @@ public class ProfileControllerTest {
     private MockMvc mockMvc;
     private ProfileController profileController;
     private final ProfileDTO profileDTO1 = new ProfileDTO(
-            1, "name1", "experience1", 1, null, null);
+            1, "name1", "mail1@mail.com", 1L, "experience1", 1, null, null);
     private final ProfileDTO profileDTO2 = new ProfileDTO(
-            2, "name2", "experience2", 2, null, null);
+            2, "name2", "mail2@mail.com", 2L, "experience2", 2, null, null);
 
 
     @Before

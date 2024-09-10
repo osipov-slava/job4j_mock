@@ -22,9 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import ru.checkdev.auth.domain.Notify;
-import ru.checkdev.auth.domain.Profile;
 import ru.checkdev.auth.domain.Photo;
+import ru.checkdev.auth.domain.Profile;
 import ru.checkdev.auth.domain.Role;
+import ru.checkdev.auth.exception.WrongPasswordException;
 import ru.checkdev.auth.repository.PersonRepository;
 
 import javax.imageio.IIOImage;
@@ -67,6 +68,9 @@ public class PersonService {
                 );
                 profile.setPassword(this.encoding.encode(profile.getPassword()));
                 profile.setUpdated(Calendar.getInstance());
+                if (profile.getUsername() == null) {
+                    profile.setUsername(profile.getEmail());
+                }
                 result = Optional.of(this.persons.save(profile));
                 Map<String, Object> keys = new HashMap<>();
                 keys.put("key", profile.getKey());
@@ -154,6 +158,14 @@ public class PersonService {
 
     public Profile findById(int id) {
         return this.persons.findById(id).get();
+    }
+
+    public Optional<Profile> findByTelegramId(Long id) {
+        var profiles = this.persons.findByTelegramId(id);
+        if (profiles.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(profiles.getFirst());
     }
 
     public void save(Profile profile) {
@@ -310,4 +322,13 @@ public class PersonService {
         emptyNames.addAll(Arrays.asList(extra));
         return emptyNames;
     }
+
+    @Transactional
+    public Object updateTelegramId(Profile profile, String encode) throws WrongPasswordException {
+        if (this.encoding.matches(profile.getPassword(), encode)) {
+            persons.updateTelegramId(profile.getEmail(), profile.getTelegramId());
+        } else throw new WrongPasswordException();
+        return null;
+    }
+
 }
