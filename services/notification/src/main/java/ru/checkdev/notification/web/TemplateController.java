@@ -1,7 +1,9 @@
 package ru.checkdev.notification.web;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.checkdev.notification.domain.Notify;
@@ -18,6 +20,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/template")
+@Slf4j
 public class TemplateController {
 
     private final TemplateService templates;
@@ -69,6 +72,12 @@ public class TemplateController {
             this.notifications.put(notify);
         }
         return notify;
+    }
+
+    @KafkaListener(topics = "checkdev_notify")
+    public void kafkaQueue(Notify notify) {
+        log.info("Notify was received and sent: " + notify.getEmail() + "\n" + notify.getTemplate());
+        this.notifications.put(notify);
     }
 
     @GetMapping("/ping")
