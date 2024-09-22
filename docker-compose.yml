@@ -1,0 +1,149 @@
+services:
+  db_auth:
+    image: postgres
+    container_name: db_auth
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=cd_auth
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./data/auth:/var/lib/postgresql/data
+    restart: always
+
+  db_desc:
+    image: postgres
+    container_name: db_desc
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=cd_desc
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./data/desc:/var/lib/postgresql/data
+    restart: always
+
+  db_mock:
+    image: postgres
+    container_name: db_mock
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=cd_mock
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./data/mock:/var/lib/postgresql/data
+    restart: always
+
+  db_notification:
+    image: postgres
+    container_name: db_notification
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=cd_notification
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./data/notification:/var/lib/postgresql/data
+    restart: always
+
+  auth:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JDBC_URL=jdbc:postgresql://db_auth:5432/cd_auth
+      - JDBC_USERNAME=postgres
+      - JDBC_PASSWORD=password
+      - JDBC_DRIVER=org.postgresql.Driver
+    container_name: auth
+    depends_on:
+      - db_auth
+
+  desc:
+      build:
+        context: ./services/desc
+        dockerfile: Dockerfile
+      environment:
+        - SPRING_PROFILES_ACTIVE=docker
+        - JDBC_URL=jdbc:postgresql://db_desc:5432/cd_desc
+        - JDBC_USERNAME=postgres
+        - JDBC_PASSWORD=password
+        - JDBC_DRIVER=org.postgresql.Driver
+      container_name: desc
+      expose:
+        - 9902
+      depends_on:
+        - db_desc
+
+  mock:
+    build:
+      context: ./services/mock
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JDBC_URL=jdbc:postgresql://db_mock:5432/cd_mock
+      - JDBC_USERNAME=postgres
+      - JDBC_PASSWORD=password
+      - JDBC_DRIVER=org.postgresql.Driver
+    container_name: mock
+    expose:
+      - 9912
+    depends_on:
+      - db_mock
+
+  notification:
+    build:
+      context: ./services/notification
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JDBC_URL=jdbc:postgresql://db_notification:5432/cd_notification
+      - JDBC_USERNAME=postgres
+      - JDBC_PASSWORD=password
+      - JDBC_DRIVER=org.postgresql.Driver
+    container_name: notification
+    expose:
+      - 9920
+    depends_on:
+      - db_notification
+
+  site:
+    build:
+      context: ./services/site
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "127.0.0.1:8080:8080"
+    expose:
+       - 8080
+    container_name: site
+    depends_on:
+      - auth
+      - desc
+      - mock
+      - notification
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.4
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.4
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1

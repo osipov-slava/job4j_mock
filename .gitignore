@@ -1,4 +1,5 @@
 ## generic files to ignore
+logs/
 *~
 *.lock
 *.DS_Store
@@ -6,6 +7,8 @@
 *.out
 *.log
 
+#docker created
+data/
 # rails specific
 *.sqlite3
 config/database.yml

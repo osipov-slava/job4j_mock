@@ -19,7 +19,7 @@ public class MockSrv {
     @Bean
     public SpringLiquibase liquibase(DataSource ds) {
         SpringLiquibase liquibase = new SpringLiquibase();
-        liquibase.setChangeLog("classpath:db/liquibase-changeLog.xml");
+        liquibase.setChangeLog("classpath:db/db.changelog-master.xml");
         liquibase.setDataSource(ds);
         return liquibase;
     }

@@ -13,6 +13,9 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!--suppress UnresolvedMavenProperty -->
+        <docker_db_url_jdbc>${JDBC_URL}</docker_db_url_jdbc>
     </properties>
 
     <parent>
@@ -22,12 +25,44 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <profiles>
+        <profile>
+            <id>test</id>
+            <properties>
+                <liquibase.changeLogFile>db/db.changelog-master.xml</liquibase.changeLogFile>
+                <liquibase.url>jdbc:h2:./testdb;MODE=PostgreSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;</liquibase.url>
+                <liquibase.username></liquibase.username>
+                <liquibase.password></liquibase.password>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>production</id>
+            <properties>
+                <liquibase.changeLogFile>db/db.changelog-master.xml</liquibase.changeLogFile>
+                <liquibase.url>jdbc:postgresql://127.0.0.1:5432/cd_auth</liquibase.url>
+                <liquibase.username>postgres</liquibase.username>
+                <liquibase.password>password</liquibase.password>
+            </properties>
+        </profile>
+        <profile>
+            <id>docker</id>
+            <properties>
+                <liquibase.changeLogFile>db/db.changelog-master.xml</liquibase.changeLogFile>
+                <liquibase.url>${docker_db_url_jdbc}</liquibase.url>
+                <liquibase.username>postgres</liquibase.username>
+                <liquibase.password>password</liquibase.password>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.2.222</version>
             <scope>test</scope>
         </dependency>
 
@@ -133,8 +168,32 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <compilerVersion>17</compilerVersion>
+                    <compilerVersion>21</compilerVersion>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>4.15.0</version>
+                <configuration>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <changeLogFile>${liquibase.changeLogFile}</changeLogFile>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <url>${liquibase.url}</url>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <username>${liquibase.username}</username>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <password>${liquibase.password}</password>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>clearCheckSums</goal>
+                            <goal>update</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
